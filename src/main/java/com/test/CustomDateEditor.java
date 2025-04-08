@@ -1,8 +1,7 @@
 package com.test;
 
 import com.minis.util.StringUtils;
-import com.minis.web.CustomNumberEditor;
-import com.minis.web.PropertyEditor;
+import com.minis.beans.PropertyEditor;
 
 import java.time.LocalDate;
 import java.time.ZoneId;

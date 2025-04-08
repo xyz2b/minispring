@@ -1,9 +1,5 @@
 package com.minis.beans;
 
-import com.minis.web.CustomNumberEditor;
-import com.minis.web.PropertyEditor;
-import com.minis.web.StringEditor;
-
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.HashMap;

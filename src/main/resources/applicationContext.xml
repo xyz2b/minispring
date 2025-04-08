@@ -18,5 +18,20 @@
         <constructor-arg type="int" name="i" value="1"/>
         <constructor-arg type="String" name="s" value="s"/>
     </bean>
-    <bean id="webBindingInitializer" class="com.test.DateInitializer"/>
+
+    <bean id="webBindingInitializer" class="com.test.DateInitializer" />
+
+    <bean id="messageConverter" class="com.minis.http.converter.DefaultHttpMessageConverter">
+        <property type="com.minis.util.ObjectMapper" name="objectMapper" ref="objectMapper"/>
+    </bean>
+    <bean id="objectMapper" class="com.minis.util.DefaultObjectMapper" >
+        <property type="String" name="dateFormat" value="yyyy/MM/dd"/>
+        <property type="String" name="decimalFormat" value="###.##"/>
+    </bean>
+
+    <bean id="viewResolver" class="com.minis.web.servlet.view.InternalResourceViewResolver" >
+        <property type="String" name="viewClassName" value="com.minis.web.servlet.view.JstlView" />
+        <property type="String" name="prefix" value="/jsp/" />
+        <property type="String" name="suffix" value=".jsp" />
+    </bean>
 </beans>
