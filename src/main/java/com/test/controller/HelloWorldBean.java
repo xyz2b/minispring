@@ -7,18 +7,16 @@ import com.test.entity.TestProperty;
 import com.test.entity.TestProperty2;
 import com.test.entity.User;
 import com.test.service.BaseService;
+import com.test.service.UserService;
 
 import java.util.Date;
 
 public class HelloWorldBean {
     @Autowired
     BaseService baseservice;
-//    public String doGet() {
-//        return "hello world!";
-//    }
-//    public String doPost() {
-//        return "hello world!";
-//    }
+
+    @Autowired
+    UserService userService;
 
     @RequestMapping(url = "/test")
     public String doTest() {
@@ -47,5 +45,11 @@ public class HelloWorldBean {
         user.setName(user.getName() + "---");
         user.setBirthday(new Date());
         return user;
+    }
+
+    @RequestMapping(url = "/test8")
+    @ResponseBody
+    public User doTest8(User user) {
+        return userService.getUserInfo(user.getId());
     }
 }

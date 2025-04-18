@@ -34,4 +34,27 @@
         <property type="String" name="prefix" value="/jsp/" />
         <property type="String" name="suffix" value=".jsp" />
     </bean>
+
+<!--    <bean id="dataSource" class="com.minis.jdbc.datasource.SingleConnectionDataSource">-->
+<!--        <property type="String" name="driverClassName" value="com.mysql.cj.jdbc.Driver"/>-->
+<!--        <property type="String" name="url" value="jdbc:mysql://127.0.0.1:3306/test"/>-->
+<!--        <property type="String" name="username" value="test"/>-->
+<!--        <property type="String" name="password" value="123456"/>-->
+<!--    </bean>-->
+
+    <bean id="jdbcTemplate" class="com.minis.jdbc.core.JdbcTemplate" >
+        <property type="javax.sql.DataSource" name="dataSource" ref="dataSource"/>
+    </bean>
+
+    <bean id="userService" class="com.test.service.UserService">
+        <property type="com.minis.jdbc.core.JdbcTemplate" name="jdbcTemplate" ref="jdbcTemplate"/>
+    </bean>
+
+    <bean id="dataSource" class="com.minis.jdbc.pool.PooledDataSource">
+        <property type="String" name="driverClassName" value="com.mysql.cj.jdbc.Driver"/>
+        <property type="String" name="url" value="jdbc:mysql://127.0.0.1:3306/test"/>
+        <property type="String" name="username" value="test"/>
+        <property type="String" name="password" value="123456"/>
+        <property type="int" name="initialSize" value="3"/>
+    </bean>
 </beans>

@@ -53,6 +53,7 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
                     try {
                         singleton = createBean(beanDefinition);
                     } catch (Exception e) {
+                        e.printStackTrace();
                         return null;
                     }
                     // 注册 Bean 实例
@@ -193,8 +194,10 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
                         paramTypes[0] = String.class;
                     } else if("Integer".equals(pType)) {
                         paramTypes[0] = Integer.class;
+                        pValue = Integer.valueOf((String) pValue);
                     } else if("int".equals(pType)) {
                         paramTypes[0] = int.class;
+                        pValue = Integer.valueOf((String) pValue);
                     } else {
                         // 默认为 String
                         paramTypes[0] = String.class;
@@ -227,6 +230,8 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
                 } catch (InvocationTargetException e) {
                     throw new RuntimeException(e);
                 } catch (IllegalAccessException e) {
+                    throw new RuntimeException(e);
+                } catch (IllegalArgumentException e) {
                     throw new RuntimeException(e);
                 }
             }
