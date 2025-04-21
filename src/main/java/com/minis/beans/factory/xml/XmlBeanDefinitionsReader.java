@@ -20,7 +20,7 @@ public class XmlBeanDefinitionsReader {
     private static final String BEAN_PROPERTY_NAME = "name";
     private static final String BEAN_PROPERTY_VALUE = "value";
     private static final String BEAN_PROPERTY_REF= "ref";
-
+    private static final String BEAN_PROPERTY_INIT_METHOD= "init-method";
     private static final String BEAN_CONSTRUCTOR_ARG = "constructor-arg";
 
     private AbstractBeanFactory bf;
@@ -34,7 +34,9 @@ public class XmlBeanDefinitionsReader {
             Element element = (Element) resource.next();
             String beanID = element.attributeValue(BEAN_ID);
             String beanClassName = element.attributeValue(BEAN_CLASS);
+            String initMethodName = element.attributeValue(BEAN_PROPERTY_INIT_METHOD);
             BeanDefinition beanDefinition = new BeanDefinition(beanID, beanClassName);
+            beanDefinition.setInitMethodName(initMethodName);
 
             // 处理属性
             List<Element> propertyElements = element.elements(BEAN_PROPERTY);

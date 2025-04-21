@@ -31,6 +31,9 @@ public class DefaultObjectMapper implements ObjectMapper {
 
     @Override
     public String writeValuesAsString(Object object) {
+        if (object == null) {
+            return "";
+        }
         StringBuilder sJsonStr = new StringBuilder("{");
         Class<?> clz = object.getClass();
         Field[] fields = clz.getDeclaredFields();

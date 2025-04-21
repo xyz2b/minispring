@@ -3,6 +3,8 @@ package com.minis.beans.factory.support;
 import com.minis.beans.BeansException;
 import com.minis.beans.PropertyValue;
 import com.minis.beans.PropertyValues;
+import com.minis.beans.factory.BeanFactoryAware;
+import com.minis.beans.factory.FactoryBean;
 import com.minis.beans.factory.config.BeanDefinition;
 import com.minis.beans.factory.config.ConfigurableBeanFactory;
 import com.minis.beans.factory.config.ConstructorArgumentValue;
@@ -19,7 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry implements ConfigurableBeanFactory, BeanDefinitionRegistry {
+public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport implements ConfigurableBeanFactory, BeanDefinitionRegistry {
     protected Map<String, BeanDefinition> beanDefinitionMap = new ConcurrentHashMap<>(256);
     protected List<String> beanDefinitionNames = new ArrayList<>();
     private final Map<String, Object> earlySingletonObjects = new HashMap<>(16);
@@ -59,12 +61,20 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
                     // 注册 Bean 实例
                     this.registerSingleton(beanName, singleton);
 
+                    if (singleton instanceof BeanFactoryAware) {
+                        ((BeanFactoryAware) singleton).setBeanFactory(this);
+                    }
+
                     // 进行 beanpostprocessor 处理
                     // step1: postProcessBeforeInitialization
                     applyBeanPostProcessorBeforeInitialization(singleton, beanName);
                     // step2: init-method
                     if(beanDefinition.getInitMethodName() != null && !beanDefinition.getInitMethodName().equals("")) {
-                        invokeInitMethod(beanDefinition, singleton);
+                        try {
+                            invokeInitMethod(beanDefinition, singleton);
+                        } catch (ClassNotFoundException e) {
+                            throw new RuntimeException(e);
+                        }
                     }
                     // step3: postProcessAfterInitialization
                     applyBeanPostProcessorAfterInitialization(singleton, beanName);
@@ -72,7 +82,24 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
             }
 
         }
+
+        // 处理 factory bean
+        if(singleton instanceof FactoryBean) {
+            return this.getObjectForBeanInstance(singleton, beanName);
+        }
+
         return singleton;
+    }
+
+    protected Object getObjectForBeanInstance(Object beanInstance, String beanName) {
+        // Now we have the bean instance, which may be a normal bean or a FactoryBean.
+        if(!(beanInstance instanceof FactoryBean)) {
+            return beanInstance;
+        }
+        Object object = null;
+        FactoryBean<?> factory = (FactoryBean<?>) beanInstance;
+        object = getObjectFromFactoryBean(factory, beanName);
+        return object;
     }
 
     private Object createBean(BeanDefinition beanDefinition) {
@@ -238,8 +265,8 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
         }
     }
 
-    private void invokeInitMethod(BeanDefinition beanDefinition, Object obj) {
-        Class<?> clz = beanDefinition.getClass();
+    private void invokeInitMethod(BeanDefinition beanDefinition, Object obj) throws ClassNotFoundException {
+        Class<?> clz = beanDefinition.getBeanClass();
         Method method = null;
         try {
             method = clz.getMethod(beanDefinition.getInitMethodName());

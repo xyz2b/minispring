@@ -7,8 +7,12 @@ import com.test.entity.TestProperty;
 import com.test.entity.TestProperty2;
 import com.test.entity.User;
 import com.test.service.BaseService;
+import com.test.service.IAction;
 import com.test.service.UserService;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.Date;
 
 public class HelloWorldBean {
@@ -17,6 +21,9 @@ public class HelloWorldBean {
 
     @Autowired
     UserService userService;
+
+    @Autowired
+    IAction action;
 
     @RequestMapping(url = "/test")
     public String doTest() {
@@ -51,5 +58,23 @@ public class HelloWorldBean {
     @ResponseBody
     public User doTest8(User user) {
         return userService.getUserInfo(user.getId());
+    }
+
+    @RequestMapping(url = "/test9")
+    @ResponseBody
+    public User doTest9(User user) {
+        return userService.getUserInfoByMyBits(user.getId());
+    }
+
+    @RequestMapping(url = "/testaop")
+    public void doTestAop(HttpServletRequest request, HttpServletResponse response) {
+        action.doAction();
+
+        String str = "test aop, hello world!";
+        try {
+            response.getWriter().write(str);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

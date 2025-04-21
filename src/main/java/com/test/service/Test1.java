@@ -11,9 +11,15 @@ public class Test1 {
         aService.sayHello();
 //        Test1 test1 = new Test1();
 //        test1.test();
+//        System.out.println(test1.getResourcePath());
     }
 
 //    public void test() {
 //        System.out.println(this.getClass().getResource("/com/minis/test"));
+//    }
+
+//    public String getResourcePath() {
+//        String locationPath = this.getClass().getClassLoader().getResource("").getPath();
+//        return locationPath;
 //    }
 }
