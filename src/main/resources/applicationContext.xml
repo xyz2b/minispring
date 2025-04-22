@@ -19,6 +19,8 @@
         <constructor-arg type="String" name="s" value="s"/>
     </bean>
 
+    <bean id="autowiredAnnotationBeanPostProcessor" class="com.minis.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor"/>
+
     <bean id="webBindingInitializer" class="com.test.DateInitializer" />
 
     <bean id="messageConverter" class="com.minis.http.converter.DefaultHttpMessageConverter">
@@ -63,15 +65,22 @@
         <property type="com.minis.batis.SqlSessionFactory" name="sqlSessionFactory" ref="sqlSessionFactory"/>
     </bean>
 
-    <bean id="realaction" class="com.test.service.Action1" />
-    <bena id="beforeAdvice" class="com.test.service.MyBeforeAdvice" />
+    <bean id="action" class="com.test.service.Action1" />
+    <bean id="action2" class="com.test.service.Action2" />
+
+    <bena id="myBeforeAdvice" class="com.test.service.MyBeforeAdvice"/>
     <bean id="myAfterAdvice" class="com.test.service.MyAfterAdvice"/>
     <bean id="advisor" class="com.minis.aop.NameMatchMethodPointcutAdvisor">
-        <property type="com.minis.aop.Advice" name="advice" ref="myAfterAdvice"/>
+        <property type="com.minis.aop.Advice" name="advice" ref="myBeforeAdvice"/>
         <property type="String" name="mappedName" value="do*"/>
     </bean>
-    <bean id="action" class="com.minis.aop.ProxyFactoryBean">
-        <property type="String" name="interceptorName" value="advisor" />
-        <property type="java.lang.Object" name="target" ref="realaction"/>
+<!--    <bean id="action" class="com.minis.aop.ProxyFactoryBean">-->
+<!--        <property type="String" name="interceptorName" value="advisor" />-->
+<!--        <property type="java.lang.Object" name="target" ref="realaction"/>-->
+<!--    </bean>-->
+
+    <bean id="autoProxyCreator" class="com.minis.aop.framework.autoproxy.BeanNameAutoProxyCreator">
+        <property type="String" name="pattern" value="action*"/>
+        <property type="String" name="interceptorName" value="advisor"/>
     </bean>
 </beans>

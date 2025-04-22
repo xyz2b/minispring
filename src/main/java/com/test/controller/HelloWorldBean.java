@@ -25,6 +25,9 @@ public class HelloWorldBean {
     @Autowired
     IAction action;
 
+    @Autowired
+    IAction action2;
+
     @RequestMapping(url = "/test")
     public String doTest() {
         return "test";
@@ -70,7 +73,7 @@ public class HelloWorldBean {
     public void doTestAop(HttpServletRequest request, HttpServletResponse response) {
         action.doAction();
 
-        String str = "test aop do action, hello world!";
+        String str = "test aop do action1, hello world!";
         try {
             response.getWriter().write(str);
         } catch (IOException e) {
@@ -82,7 +85,31 @@ public class HelloWorldBean {
     public void doTestAop2(HttpServletRequest request, HttpServletResponse response) {
         action.doSomething();
 
-        String str = "test aop do something, hello world!";
+        String str = "test aop do something1, hello world!";
+        try {
+            response.getWriter().write(str);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @RequestMapping(url = "/testaop3")
+    public void doTestAop3(HttpServletRequest request, HttpServletResponse response) {
+        action2.doAction();
+
+        String str = "test aop do action2, hello world!";
+        try {
+            response.getWriter().write(str);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    @RequestMapping(url = "/testaop4")
+    public void doTestAop4(HttpServletRequest request, HttpServletResponse response) {
+        action2.doSomething();
+
+
+        String str = "test aop do something2, hello world!";
         try {
             response.getWriter().write(str);
         } catch (IOException e) {

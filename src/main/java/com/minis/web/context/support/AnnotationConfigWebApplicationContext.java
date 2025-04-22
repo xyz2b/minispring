@@ -4,6 +4,7 @@ import com.minis.beans.BeansException;
 import com.minis.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor;
 import com.minis.beans.factory.config.BeanDefinition;
 import com.minis.beans.factory.config.BeanFactoryPostProcessor;
+import com.minis.beans.factory.config.BeanPostProcessor;
 import com.minis.beans.factory.config.ConfigurableListableBeanFactory;
 import com.minis.beans.factory.support.DefaultListableBeanFactory;
 import com.minis.context.*;
@@ -120,9 +121,20 @@ public class AnnotationConfigWebApplicationContext extends AbstractApplicationCo
     }
 
     @Override
-    protected void registerListeners() {
-        ApplicationListener listener = new ApplicationListener();
-        this.getApplicationEventPublisher().addApplicationListener(listener);
+    public void registerListeners() {
+        String[] bdNames = this.beanFactory.getBeanDefinitionNames();
+        for (String bdName : bdNames) {
+            Object bean = null;
+            try {
+                bean = getBean(bdName);
+            } catch (BeansException e1) {
+                e1.printStackTrace();
+            }
+
+            if (bean instanceof ApplicationListener) {
+                this.getApplicationEventPublisher().addApplicationListener((ApplicationListener<?>) bean);
+            }
+        }
     }
 
     @Override
@@ -132,14 +144,19 @@ public class AnnotationConfigWebApplicationContext extends AbstractApplicationCo
     }
 
     @Override
-    protected void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) {
+    public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) {
 
     }
 
     @Override
     protected void registerBeanPostProcessors(ConfigurableListableBeanFactory beanFactory) {
-        this.beanFactory.addBeanPostProcessor(new AutowiredAnnotationBeanPostProcessor());
+        try {
+            this.beanFactory.addBeanPostProcessor((BeanPostProcessor)(this.beanFactory.getBean("autowiredAnnotationBeanPostProcessor")));
+        } catch (BeansException e) {
+            throw new RuntimeException(e);
+        }
     }
+
 
     @Override
     protected void onRefresh() {

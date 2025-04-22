@@ -59,7 +59,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
                         return null;
                     }
                     // 注册 Bean 实例
-                    this.registerSingleton(beanName, singleton);
+                    this.registerBean(beanName, singleton);
 
                     if (singleton instanceof BeanFactoryAware) {
                         ((BeanFactoryAware) singleton).setBeanFactory(this);
@@ -67,7 +67,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 
                     // 进行 beanpostprocessor 处理
                     // step1: postProcessBeforeInitialization
-                    applyBeanPostProcessorBeforeInitialization(singleton, beanName);
+                    singleton = applyBeanPostProcessorBeforeInitialization(singleton, beanName);
                     // step2: init-method
                     if(beanDefinition.getInitMethodName() != null && !beanDefinition.getInitMethodName().equals("")) {
                         try {
@@ -78,6 +78,8 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
                     }
                     // step3: postProcessAfterInitialization
                     applyBeanPostProcessorAfterInitialization(singleton, beanName);
+                    this.removeSingleton(beanName);
+                    this.registerBean(beanName, singleton);
                 }
             }
 

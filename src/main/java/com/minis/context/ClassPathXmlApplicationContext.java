@@ -2,7 +2,9 @@ package com.minis.context;
 
 import com.minis.beans.BeansException;
 import com.minis.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor;
+import com.minis.beans.factory.config.BeanDefinition;
 import com.minis.beans.factory.config.BeanFactoryPostProcessor;
+import com.minis.beans.factory.config.BeanPostProcessor;
 import com.minis.beans.factory.config.ConfigurableListableBeanFactory;
 import com.minis.beans.factory.support.DefaultListableBeanFactory;
 import com.minis.beans.factory.xml.XmlBeanDefinitionsReader;
@@ -50,13 +52,24 @@ public class ClassPathXmlApplicationContext extends AbstractApplicationContext {
     }
 
     @Override
-    protected void registerListeners() {
-        ApplicationListener listener = new ApplicationListener();
-        this.getApplicationEventPublisher().addApplicationListener(listener);
+    public void registerListeners() {
+        String[] bdNames = this.beanFactory.getBeanDefinitionNames();
+        for (String bdName : bdNames) {
+            Object bean = null;
+            try {
+                bean = getBean(bdName);
+            } catch (BeansException e1) {
+                e1.printStackTrace();
+            }
+
+            if (bean instanceof ApplicationListener) {
+                this.getApplicationEventPublisher().addApplicationListener((ApplicationListener<?>) bean);
+            }
+        }
     }
 
     @Override
-    protected void initApplicationEventPublisher() {
+    public void initApplicationEventPublisher() {
         ApplicationEventPublisher aep = new SimpleApplicationEventPublisher();
         this.setApplicationEventPublisher(aep);
     }
@@ -67,14 +80,57 @@ public class ClassPathXmlApplicationContext extends AbstractApplicationContext {
     }
 
     @Override
-    protected void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) {
-
+    public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) {
+        String[] bdNames = this.beanFactory.getBeanDefinitionNames();
+        for (String bdName : bdNames) {
+            BeanDefinition bd = this.beanFactory.getBeanDefinition(bdName);
+            String clzName = bd.getClassName();
+            Class<?> clz = null;
+            try {
+                clz = Class.forName(clzName);
+            } catch (ClassNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+            if(BeanFactoryPostProcessor.class.isAssignableFrom(clz)) {
+                try {
+                    this.beanFactoryPostProcessors.add((BeanFactoryPostProcessor) clz.newInstance());
+                } catch (InstantiationException e) {
+                    throw new RuntimeException(e);
+                } catch (IllegalAccessException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+        for(BeanFactoryPostProcessor processor : this.beanFactoryPostProcessors) {
+            try {
+                processor.postProcessBeanFactory(beanFactory);
+            } catch (BeansException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 
-    protected void registerBeanPostProcessors(ConfigurableListableBeanFactory bf) {
-        //if (supportAutowire) {
-            bf.addBeanPostProcessor(new AutowiredAnnotationBeanPostProcessor());
-        //}
+    public void registerBeanPostProcessors(ConfigurableListableBeanFactory bf) {
+        System.out.println("try to registerBeanPostProcessors");
+        String[] bdNames = this.beanFactory.getBeanDefinitionNames();
+        for (String bdName : bdNames) {
+            BeanDefinition bd = this.beanFactory.getBeanDefinition(bdName);
+            String clzName = bd.getClassName();
+            Class<?> clz = null;
+            try {
+                clz = Class.forName(clzName);
+            } catch (ClassNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+            if(BeanPostProcessor.class.isAssignableFrom(clz)) {
+                System.out.println("registerBeanPostProcessors : " + clzName);
+                try {
+                    this.beanFactory.addBeanPostProcessor((BeanPostProcessor)(this.beanFactory.getBean(bdName)));
+                } catch (BeansException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
     }
 
     protected void onRefresh() {
@@ -83,7 +139,7 @@ public class ClassPathXmlApplicationContext extends AbstractApplicationContext {
 
     @Override
     protected void finishRefresh() {
-        publishEvent(new ContextRefreshEvent("Context Refreshed..."));
+        publishEvent(new ContextRefreshedEvent(this));
     }
 
     // context再对外提供一个 getBean，底下就是调用的 BeanFactory 对应的方法
