@@ -70,7 +70,19 @@ public class HelloWorldBean {
     public void doTestAop(HttpServletRequest request, HttpServletResponse response) {
         action.doAction();
 
-        String str = "test aop, hello world!";
+        String str = "test aop do action, hello world!";
+        try {
+            response.getWriter().write(str);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @RequestMapping(url = "/testaop2")
+    public void doTestAop2(HttpServletRequest request, HttpServletResponse response) {
+        action.doSomething();
+
+        String str = "test aop do something, hello world!";
         try {
             response.getWriter().write(str);
         } catch (IOException e) {

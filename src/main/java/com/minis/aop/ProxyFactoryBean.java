@@ -8,7 +8,6 @@ import com.minis.util.ClassUtils;
 
 public class ProxyFactoryBean implements FactoryBean<Object>, BeanFactoryAware {
     private AopProxyFactory aopProxyFactory;
-    private String[] interceptorNames;
     private String targetName;
     private Object target;
     private ClassLoader proxyClassLoader = ClassUtils.getDefaultClassLoader();
@@ -16,7 +15,7 @@ public class ProxyFactoryBean implements FactoryBean<Object>, BeanFactoryAware {
 
     private BeanFactory beanFactory;
     private String interceptorName;
-    private Advisor advisor;
+    private PointcutAdvisor advisor;
 
     // 将应用程序自定义的拦截器获取到 Advisor 里。并且，可以在 IoC 容器中配置这个 Interceptor 名字。
     private synchronized void initializeAdvisor() {
@@ -26,8 +25,7 @@ public class ProxyFactoryBean implements FactoryBean<Object>, BeanFactoryAware {
         } catch (BeansException e) {
             throw new RuntimeException(e);
         }
-        advisor = new DefaultAdvisor();
-        advisor.setMethodInterceptor((MethodInterceptor) advice);
+        advisor = (PointcutAdvisor) advice;
     }
 
     public ProxyFactoryBean() {
@@ -48,10 +46,6 @@ public class ProxyFactoryBean implements FactoryBean<Object>, BeanFactoryAware {
 
     public AopProxyFactory getAopProxyFactory() {
         return aopProxyFactory;
-    }
-
-    public void setInterceptorNames(String... interceptorNames) {
-        this.interceptorNames = interceptorNames;
     }
 
     public void setTargetName(String targetName) {

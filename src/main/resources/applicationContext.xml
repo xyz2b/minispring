@@ -63,10 +63,15 @@
         <property type="com.minis.batis.SqlSessionFactory" name="sqlSessionFactory" ref="sqlSessionFactory"/>
     </bean>
 
-    <bean id="myInterceptor" class="com.test.service.TracingInterceptor" />
     <bean id="realaction" class="com.test.service.Action1" />
-    <bean id="action" class="com.minis.aop.ProxyFactoryBean" >
+    <bena id="beforeAdvice" class="com.test.service.MyBeforeAdvice" />
+    <bean id="myAfterAdvice" class="com.test.service.MyAfterAdvice"/>
+    <bean id="advisor" class="com.minis.aop.NameMatchMethodPointcutAdvisor">
+        <property type="com.minis.aop.Advice" name="advice" ref="myAfterAdvice"/>
+        <property type="String" name="mappedName" value="do*"/>
+    </bean>
+    <bean id="action" class="com.minis.aop.ProxyFactoryBean">
+        <property type="String" name="interceptorName" value="advisor" />
         <property type="java.lang.Object" name="target" ref="realaction"/>
-        <property type="String" name="interceptorName" value="myInterceptor"/>
     </bean>
 </beans>
